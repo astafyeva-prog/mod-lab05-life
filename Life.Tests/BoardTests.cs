@@ -186,8 +186,23 @@ namespace Life.Tests
             
             var combinations = board.FindCombinations();
             string classification = board.ClassifyCombination(combinations[0]);
-            // Проверяем, что классификация содержит "Blinker" или что это периодическая фигура
-            Assert.Contains("периодическая", classification);
+            // Проверяем, что классификация содержит "Blinker"
+            Assert.Contains("Blinker", classification);
+        }
+
+        [Fact]
+        public void ClassifyCombination_IdentifiesHorizontalBlinker()
+        {
+            var board = new Board(10, 10);
+            // Создаем горизонтальную мигалку
+            board.SetCell(4, 5, true);
+            board.SetCell(5, 5, true);
+            board.SetCell(6, 5, true);
+            
+            var combinations = board.FindCombinations();
+            string classification = board.ClassifyCombination(combinations[0]);
+            // Проверяем, что классификация содержит "Blinker"
+            Assert.Contains("Blinker", classification);
         }
 
         [Fact]
@@ -316,10 +331,7 @@ namespace Life.Tests
             board.SetCell(4, 5, true);
             board.SetCell(5, 5, true);
             
-            var initialState = new Board(10, 10);
-            for (int i = 0; i < 10; i++)
-                for (int j = 0; j < 10; j++)
-                    initialState.SetCell(i, j, board.GetCell(i, j));
+            var initialState = board.Clone();
             
             // Проходим 10 поколений
             for (int gen = 0; gen < 10; gen++)
