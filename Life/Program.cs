@@ -161,38 +161,51 @@ namespace Life
             return combinations;
         }
 
-        public string ClassifyCombination(List<Cell> combination)
-        {
-            var pattern = new HashSet<(int, int)>();
-            int minX = combination.Min(c => c.X);
-            int minY = combination.Min(c => c.Y);
-            
-            foreach (var cell in combination)
-            {
-                pattern.Add((cell.X - minX, cell.Y - minY));
-            }
+     public string ClassifyCombination(List<Cell> combination)
+{
+    var pattern = new HashSet<(int, int)>();
+    int minX = combination.Min(c => c.X);
+    int minY = combination.Min(c => c.Y);
+    
+    foreach (var cell in combination)
+    {
+        pattern.Add((cell.X - minX, cell.Y - minY));
+    }
 
-            // Известные стабильные фигуры
-            var block = new HashSet<(int, int)> { (0,0), (1,0), (0,1), (1,1) };
-            var beehive = new HashSet<(int, int)> { (1,0), (2,0), (0,1), (3,1), (1,2), (2,2) };
-            var loaf = new HashSet<(int, int)> { (1,0), (2,0), (0,1), (3,1), (1,2), (3,2), (2,3) };
-            var boat = new HashSet<(int, int)> { (0,0), (1,0), (0,1), (2,1), (1,2) };
-            var tub = new HashSet<(int, int)> { (1,0), (0,1), (2,1), (1,2) };
-            var pond = new HashSet<(int, int)> { (1,0), (2,0), (0,1), (3,1), (0,2), (3,2), (1,3), (2,3) };
-            var blinker = new HashSet<(int, int)> { (0,0), (1,0), (2,0) };
-            var glider = new HashSet<(int, int)> { (0,1), (1,2), (2,0), (2,1), (2,2) };
+    // Известные стабильные фигуры
+    var block = new HashSet<(int, int)> { (0,0), (1,0), (0,1), (1,1) };
+    var beehive = new HashSet<(int, int)> { (1,0), (2,0), (0,1), (3,1), (1,2), (2,2) };
+    var loaf = new HashSet<(int, int)> { (1,0), (2,0), (0,1), (3,1), (1,2), (3,2), (2,3) };
+    var boat = new HashSet<(int, int)> { (0,0), (1,0), (0,1), (2,1), (1,2) };
+    var tub = new HashSet<(int, int)> { (1,0), (0,1), (2,1), (1,2) };
+    var pond = new HashSet<(int, int)> { (1,0), (2,0), (0,1), (3,1), (0,2), (3,2), (1,3), (2,3) };
+    
+    // Периодические фигуры
+    var blinker1 = new HashSet<(int, int)> { (0,0), (1,0), (2,0) }; // Горизонтальная мигалка
+    var blinker2 = new HashSet<(int, int)> { (0,0), (0,1), (0,2) }; // Вертикальная мигалка
+    var toad = new HashSet<(int, int)> { (1,1), (2,1), (3,1), (0,2), (1,2), (2,2) }; // Жаба
+    
+    // Движущиеся фигуры
+    var glider = new HashSet<(int, int)> { (0,1), (1,2), (2,0), (2,1), (2,2) };
+    var lwss = new HashSet<(int, int)> { (1,0), (2,0), (3,0), (0,1), (3,1), (0,2), (3,2), (1,3), (2,3), (3,3) }; // Легкий корабль
 
-            if (pattern.SetEquals(block)) return "Block (устойчивая)";
-            if (pattern.SetEquals(beehive)) return "Beehive (устойчивая)";
-            if (pattern.SetEquals(loaf)) return "Loaf (устойчивая)";
-            if (pattern.SetEquals(boat)) return "Boat (устойчивая)";
-            if (pattern.SetEquals(tub)) return "Tub (устойчивая)";
-            if (pattern.SetEquals(pond)) return "Pond (устойчивая)";
-            if (pattern.SetEquals(blinker)) return "Blinker (периодическая)";
-            if (pattern.SetEquals(glider)) return "Glider (движущаяся)";
-            
-            return $"Неизвестная фигура (размер: {combination.Count})";
-        }
+    if (pattern.SetEquals(block)) return "Block (устойчивая)";
+    if (pattern.SetEquals(beehive)) return "Beehive (устойчивая)";
+    if (pattern.SetEquals(loaf)) return "Loaf (устойчивая)";
+    if (pattern.SetEquals(boat)) return "Boat (устойчивая)";
+    if (pattern.SetEquals(tub)) return "Tub (устойчивая)";
+    if (pattern.SetEquals(pond)) return "Pond (устойчивая)";
+    
+    // Проверка на мигалку (оба варианта)
+    if (pattern.SetEquals(blinker1) || pattern.SetEquals(blinker2)) 
+        return "Blinker (периодическая, период 2)";
+    
+    if (pattern.SetEquals(toad)) return "Toad (периодическая, период 2)";
+    if (pattern.SetEquals(glider)) return "Glider (движущаяся)";
+    if (pattern.SetEquals(lwss)) return "LWSS (движущаяся)";
+    
+    return $"Неизвестная фигура (размер: {combination.Count})";
+}
 
         public void SaveToFile(string filename)
         {
