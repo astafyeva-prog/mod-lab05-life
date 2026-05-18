@@ -1,0 +1,11 @@
+{
+  "Width": 80,
+  "Height": 40,
+  "DelayMs": 100,
+  "AutoMode": false,
+  "MaxGenerations": 1000,
+  "StabilityThreshold": 10,
+  "ResearchFieldSize": 100,
+  "ResearchAttempts": 10,
+  "ResearchMaxGenerations": 500
+}
