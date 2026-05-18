@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace Life
 {
@@ -225,6 +223,7 @@ namespace Life
         {
             string json = File.ReadAllText(filename);
             var data = JsonSerializer.Deserialize<BoardData>(json);
+            if (data == null) return;
             
             Width = data.Width;
             Height = data.Height;
@@ -239,9 +238,12 @@ namespace Life
                 }
             }
             
-            foreach (var cell in data.Cells)
+            if (data.Cells != null)
             {
-                SetCell(cell.X, cell.Y, true);
+                foreach (var cell in data.Cells)
+                {
+                    SetCell(cell.X, cell.Y, true);
+                }
             }
         }
 
@@ -296,7 +298,7 @@ namespace Life
         public int Width { get; set; }
         public int Height { get; set; }
         public int Generation { get; set; }
-        public List<CellData> Cells { get; set; }
+        public List<CellData>? Cells { get; set; }
     }
 
     public class CellData
@@ -322,7 +324,8 @@ namespace Life
             if (File.Exists(filename))
             {
                 string json = File.ReadAllText(filename);
-                return JsonSerializer.Deserialize<Settings>(json) ?? new Settings();
+                var settings = JsonSerializer.Deserialize<Settings>(json);
+                return settings ?? new Settings();
             }
             return new Settings();
         }
@@ -336,8 +339,8 @@ namespace Life
 
     public class Program
     {
-        private static Board board;
-        private static Settings settings;
+        private static Board? board;
+        private static Settings settings = null!;
 
         static void Main(string[] args)
         {
@@ -367,7 +370,7 @@ namespace Life
                 Console.WriteLine("8. Выход");
                 Console.Write("\nВыберите действие: ");
                 
-                string choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
                 
                 switch (choice)
                 {
@@ -413,41 +416,49 @@ namespace Life
             Console.WriteLine("0. Назад");
             
             Console.Write("\nВыберите параметр для изменения: ");
-            string choice = Console.ReadLine();
+            string? choice = Console.ReadLine();
             
             switch (choice)
             {
                 case "1":
                     Console.Write("Новая ширина: ");
-                    settings.Width = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int width))
+                        settings.Width = width;
                     break;
                 case "2":
                     Console.Write("Новая высота: ");
-                    settings.Height = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int height))
+                        settings.Height = height;
                     break;
                 case "3":
                     Console.Write("Новая задержка (мс): ");
-                    settings.DelayMs = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int delay))
+                        settings.DelayMs = delay;
                     break;
                 case "4":
                     Console.Write("Новое макс. поколений: ");
-                    settings.MaxGenerations = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int maxGen))
+                        settings.MaxGenerations = maxGen;
                     break;
                 case "5":
                     Console.Write("Новый порог стабильности: ");
-                    settings.StabilityThreshold = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int threshold))
+                        settings.StabilityThreshold = threshold;
                     break;
                 case "6":
                     Console.Write("Размер поля для исследований: ");
-                    settings.ResearchFieldSize = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int fieldSize))
+                        settings.ResearchFieldSize = fieldSize;
                     break;
                 case "7":
                     Console.Write("Кол-во попыток: ");
-                    settings.ResearchAttempts = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int attempts))
+                        settings.ResearchAttempts = attempts;
                     break;
                 case "8":
                     Console.Write("Макс. поколений в исследованиях: ");
-                    settings.ResearchMaxGenerations = int.Parse(Console.ReadLine());
+                    if (int.TryParse(Console.ReadLine(), out int researchMaxGen))
+                        settings.ResearchMaxGenerations = researchMaxGen;
                     break;
                 case "0":
                     return;
@@ -462,10 +473,10 @@ namespace Life
         static void SaveGame()
         {
             Console.Write("Введите имя файла для сохранения: ");
-            string filename = Console.ReadLine();
+            string? filename = Console.ReadLine();
             if (string.IsNullOrEmpty(filename)) filename = $"save_{DateTime.Now:yyyyMMdd_HHmmss}";
             
-            board.SaveToFile($"Data/{filename}.json");
+            board?.SaveToFile($"Data/{filename}.json");
             Console.WriteLine($"Сохранено в Data/{filename}.json");
             Console.ReadKey();
         }
@@ -489,7 +500,7 @@ namespace Life
             Console.Write("Выберите файл: ");
             if (int.TryParse(Console.ReadLine(), out int choice) && choice > 0 && choice <= files.Length)
             {
-                board.LoadFromFile(files[choice - 1]);
+                board?.LoadFromFile(files[choice - 1]);
                 Console.WriteLine("Загружено успешно");
                 Console.ReadKey();
                 RunSimulation();
@@ -512,7 +523,7 @@ namespace Life
             Console.WriteLine("10. Корабль");
             Console.Write("\nВыберите фигуру: ");
             
-            string preset = Console.ReadLine();
+            string? preset = Console.ReadLine();
             
             board = new Board(settings.Width, settings.Height);
             
@@ -538,6 +549,7 @@ namespace Life
 
         static void LoadBlock()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             board.SetCell(x, y, true);
@@ -548,6 +560,7 @@ namespace Life
 
         static void LoadGlider()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             board.SetCell(x, y, true);
@@ -559,6 +572,7 @@ namespace Life
 
         static void LoadBlinker()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             board.SetCell(x, y, true);
@@ -568,7 +582,8 @@ namespace Life
 
         static void LoadGosperGliderGun()
         {
-            // Ружье Госпера
+            if (board == null) return;
+            // Ружье Госпера (упрощенная версия)
             int[,] gun = {
                 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0},
                 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0},
@@ -595,7 +610,7 @@ namespace Life
 
         static void LoadEater()
         {
-            // Пожиратель
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             int[,] eater = {
@@ -612,7 +627,7 @@ namespace Life
 
         static void LoadSpaceship()
         {
-            // Паровоз (легкий корабль)
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             int[,] spaceship = {
@@ -630,6 +645,7 @@ namespace Life
 
         static void LoadBeehive()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             board.SetCell(x, y + 1, true);
@@ -642,6 +658,7 @@ namespace Life
 
         static void LoadBoat()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             board.SetCell(x, y, true);
@@ -653,6 +670,7 @@ namespace Life
 
         static void LoadPond()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             board.SetCell(x + 1, y, true);
@@ -667,6 +685,7 @@ namespace Life
 
         static void LoadShip()
         {
+            if (board == null) return;
             int x = settings.Width / 2;
             int y = settings.Height / 2;
             int[,] ship = {
@@ -683,6 +702,7 @@ namespace Life
 
         static void RunSimulation()
         {
+            if (board == null) return;
             board.Display();
             int stableCount = 0;
             int previousLiveCount = board.CountLiveCells();
@@ -694,7 +714,7 @@ namespace Life
                 {
                     var key = Console.ReadKey(true).Key;
                     if (key == ConsoleKey.Escape) break;
-                    if (key == ConsoleKey.Space) paused = !paused;
+                    if (key == ConsoleKey.Spacebar) paused = !paused;
                     if (key == ConsoleKey.S) 
                     {
                         SaveGame();
@@ -779,7 +799,7 @@ namespace Life
                     totalGenerations += generation;
                     totalLivePercent += (double)researchBoard.CountLiveCells() / (settings.ResearchFieldSize * settings.ResearchFieldSize);
                     
-                    Console.Write($".");
+                    Console.Write(".");
                 }
                 
                 int avgGenerations = totalGenerations / settings.ResearchAttempts;
@@ -793,7 +813,6 @@ namespace Life
             
             Console.WriteLine("\nИсследование завершено. Результаты сохранены в Data/");
             Console.WriteLine("- data.txt (числовые данные)");
-            Console.WriteLine("- plot.png (график)");
             Console.WriteLine("\nНажмите любую клавишу...");
             Console.ReadKey();
         }
@@ -844,6 +863,7 @@ namespace Life
 
         static void AnalyzeBoard()
         {
+            if (board == null) return;
             Console.Clear();
             Console.WriteLine("=== Анализ текущего поля ===");
             
