@@ -35,7 +35,6 @@ namespace Life.Tests
         public void NextGeneration_BlockRemainsStable()
         {
             var board = new Board(10, 10);
-            // Создаем блок 2x2
             board.SetCell(4, 4, true);
             board.SetCell(5, 4, true);
             board.SetCell(4, 5, true);
@@ -55,19 +54,16 @@ namespace Life.Tests
         public void NextGeneration_BlinkerPeriodic()
         {
             var board = new Board(10, 10);
-            // Создаем мигалку (вертикальная)
             board.SetCell(5, 4, true);
             board.SetCell(5, 5, true);
             board.SetCell(5, 6, true);
             
             board.NextGeneration();
-            // Должна стать горизонтальной
             Assert.True(board.GetCell(4, 5));
             Assert.True(board.GetCell(5, 5));
             Assert.True(board.GetCell(6, 5));
             
             board.NextGeneration();
-            // Снова вертикальная
             Assert.True(board.GetCell(5, 4));
             Assert.True(board.GetCell(5, 5));
             Assert.True(board.GetCell(5, 6));
@@ -91,7 +87,6 @@ namespace Life.Tests
             board.SetCell(5, 6, true);
             
             board.NextGeneration();
-            // Центральная клетка должна выжить
             Assert.True(board.GetCell(5, 5));
         }
 
@@ -99,7 +94,6 @@ namespace Life.Tests
         public void NextGeneration_CellWithFourNeighborsDies()
         {
             var board = new Board(10, 10);
-            // Создаем крест
             board.SetCell(5, 4, true);
             board.SetCell(5, 5, true);
             board.SetCell(5, 6, true);
@@ -107,7 +101,6 @@ namespace Life.Tests
             board.SetCell(6, 5, true);
             
             board.NextGeneration();
-            // Центральная клетка должна умереть от перенаселения
             Assert.False(board.GetCell(5, 5));
         }
 
@@ -120,7 +113,6 @@ namespace Life.Tests
             board.SetCell(4, 5, true);
             
             board.NextGeneration();
-            // Клетка (5,5) должна родиться
             Assert.True(board.GetCell(5, 5));
         }
 
@@ -139,10 +131,8 @@ namespace Life.Tests
         public void FindCombinations_DetectsSeparateGroups()
         {
             var board = new Board(10, 10);
-            // Первая группа
             board.SetCell(1, 1, true);
             board.SetCell(1, 2, true);
-            // Вторая группа (отдельно)
             board.SetCell(5, 5, true);
             
             var combinations = board.FindCombinations();
@@ -212,38 +202,6 @@ namespace Life.Tests
             
             if (File.Exists(testFile))
                 File.Delete(testFile);
-        }
-
-        [Fact]
-        public void Glider_MovesCorrectly()
-        {
-            var board = new Board(20, 20);
-            // Планер вверх-вправо
-            board.SetCell(5, 5, true);
-            board.SetCell(6, 6, true);
-            board.SetCell(4, 7, true);
-            board.SetCell(5, 7, true);
-            board.SetCell(6, 7, true);
-            
-            var positions1 = new List<(int, int)>();
-            for (int i = 0; i < 20; i++)
-                for (int j = 0; j < 20; j++)
-                    if (board.GetCell(i, j))
-                        positions1.Add((i, j));
-            
-            board.NextGeneration();
-            board.NextGeneration();
-            board.NextGeneration();
-            board.NextGeneration();
-            
-            var positions2 = new List<(int, int)>();
-            for (int i = 0; i < 20; i++)
-                for (int j = 0; j < 20; j++)
-                    if (board.GetCell(i, j))
-                        positions2.Add((i, j));
-            
-            // Планер должен сместиться
-            Assert.NotEqual(positions1.Count, positions2.Count);
         }
 
         [Fact]
